@@ -49,23 +49,24 @@ public class ViduController {
     public ResponseEntity<String> createToken(@RequestBody Map<String, String> item) throws OpenViduJavaClientException, OpenViduHttpException {
         System.out.println("sessionId = " + item.get("sessionId"));
         Session activeSession = openVidu.getActiveSession(item.get("sessionId"));
-        Connection connection1 = activeSession.createConnection();
+        Connection connection1 = activeSession.getConnection(item.get("connectionId"));
         System.out.println(connection1.getToken());
         return ResponseEntity.ok(connection1.getToken());
     }
 
     @PostMapping("api/create")
     public ResponseEntity<String> makeSession() throws OpenViduJavaClientException, OpenViduHttpException {
+
         Session session = openVidu.createSession();
         System.out.println("first==="+session.getSessionId());
-        Session activeSession = openVidu.getActiveSession(session.getSessionId());
-        System.out.println("activeSession.getSessionId() = " + activeSession.getSessionId());
         ConnectionProperties connectionProperties = new ConnectionProperties.Builder()
                 .type(ConnectionType.WEBRTC)
                 .role(OpenViduRole.PUBLISHER)
                 .data("sessionId=" + session.getSessionId())
                 .build();
         Connection connection = session.createConnection(connectionProperties);
+        String connectionId = connection.getConnectionId();
+        System.out.println("connectionId = " + connectionId);
         return ResponseEntity.ok(session.getSessionId());
     }
 
